@@ -10,6 +10,21 @@ import pandas as pd
 import numpy as np
 
 def draw_axes(fig_size=None, hemi='both'):
+    """Generates an empty figure suitable for the value given to hemi (hemisphere)
+
+    Parameters
+    ----------
+    fig_size : tuple or None
+        Figure size (height, width) in inches. Default to None. 
+    hemi : str
+        Stands for hemisphere. Acceptable values are "north", "south" and "both". 
+        Default to "both".
+    
+    Returns
+    -------
+    Matplotlib Figure object
+    
+    """
     
     if hemi == 'both':
         #nrows=21; ncols=21
