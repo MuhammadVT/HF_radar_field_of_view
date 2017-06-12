@@ -1,4 +1,4 @@
-The code heere visualizes the SuperDARN radar fields of view in historical order
+The codes here visualizes the SuperDARN radar fields of view in historical order
 
 ### Install
 
