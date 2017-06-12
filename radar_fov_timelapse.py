@@ -27,12 +27,12 @@ def draw_axes(fig_size=None, hemi='both'):
     """
     
     if hemi == 'both':
-        #nrows=21; ncols=21
+        # initial the parameters
         nrows=21; ncols=2
         hspace = 0.04; wspace = 0.04
-        #hspace = None; wspace = None 
         h_pad=1; w_pad=1
-        # h_pad=h_pad, w_pad=w_pad
+
+        # create a figure 
         fig = plt.figure(figsize=fig_size)
         axt = plt.subplot2grid((nrows,ncols), (0,0), colspan=ncols)
         axn = plt.subplot2grid((nrows,ncols), (1,0), colspan=1, rowspan=nrows-2)
@@ -40,31 +40,46 @@ def draw_axes(fig_size=None, hemi='both'):
         axb = plt.subplot2grid((nrows,ncols), (nrows-1,0), colspan=ncols, rowspan=1)
         axes = np.array([axt, axn, axs, axb])
         plt.subplots_adjust(hspace=hspace, wspace=wspace)
-        #fig.tight_layout()
 
     if hemi == 'north' or hemi == 'south':
+        # initial the parameters
         nrows=21; ncols=1
         hspace = 0.04; wspace = 0.04
-        #hspace = None; wspace = None 
         h_pad=1; w_pad=1
-        # h_pad=h_pad, w_pad=w_pad
+
+        # create a figure 
         fig = plt.figure(figsize=fig_size)
         axt = plt.subplot2grid((nrows,ncols), (0,0), colspan=ncols)
         axm = plt.subplot2grid((nrows,ncols), (1,0), colspan=1, rowspan=nrows-2)
         axb = plt.subplot2grid((nrows,ncols), (nrows-1,0), colspan=ncols, rowspan=1)
         axes = np.array([axt, axm, axb])
 
-
     return fig, axes
 
 def get_rad_by_year(stime, etime):
+    """Fetch radars available within a perid between stime and etime.
+
+    Parameters 
+    ----------
+    stime : datetime.datetime
+        Start time
+    etime : datetime.datetime
+        End time
+
+    Returns
+    -------
+    Pandas DataFrame
     
+    """
+    
+    # initialize parameters
     codes_north = []
     nbeams_north = []
     stimes_north = []
     codes_south = []
     nbeams_south = []
     stimes_south = []
+
     # get all radars
     rads = network().radars
     for rad in rads:
@@ -275,7 +290,8 @@ def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
         dts = pd.date_range(start=stm2, end=etm, freq='6m')
     if hemi == 'both':
         #fpath = './full_time_lapse/'
-        fpath = './time_lapse/'
+        #fpath = './time_lapse/'
+        fpath = './tmp/'
     if hemi == 'north':
         fpath = './north_time_lapse/'
     if hemi == 'south':
@@ -293,8 +309,8 @@ stm2 = dt.datetime(2003, 1, 31)   # to start the plotting time from 2003
 etm = dt.datetime(2016, 1, 31)
 #coords='mlt'
 coords='mag'
-#hemi = 'both'
+hemi = 'both'
 #hemi = 'north'
-hemi = 'south'
+#hemi = 'south'
 loop_fovs(stm=stm, etm=etm, hemi=hemi, stm2=stm2, coords=coords, fovAlpha=0.7)
 
