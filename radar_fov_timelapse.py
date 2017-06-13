@@ -153,6 +153,23 @@ def get_rad_by_year(stime, etime):
 def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
               hemi='both', coords='mag', fovAlpha=0.7, 
               fpath='./full_time_lapse'):
+    """
+    Parameters
+    ----------
+    stime : datetime.datetime
+    etime : datetime.datetime
+    stm2 : datetime.datetime
+    etm : datetime.datetime
+    hemi : str
+        Hemisphere(s). Valid inputs are "north", "south", "both"
+    coords : str
+        Coordinates used in the plot. Valid inputs are "mag", "geo", "mlt"
+    fovAlpha : float
+        Transparency of the radar fields of view.
+        Valid inputs are between 0.0 to 1.0.
+    fpath : str
+        File path where the output plots will be saved
+    """
 
     if hemi == 'both':
         fig, axes = draw_axes(fig_size=(15, 9), hemi=hemi)
@@ -252,10 +269,13 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
         m2.ax = axs
         if not df.empty:
             overlayRadar(m2, codes=rads_south, markerSize=msize, fontSize=fsize)
+
             # overlay midlatitude radars
             overlayFov(m2, codes=rads_mid_south, maxGate=75, fovColor=midlat_color, fovAlpha=fovAlpha)
+
             # overlay high-latitude radars
             overlayFov(m2, codes=rads_high_south, maxGate=75, fovColor=highlat_color, fovAlpha=fovAlpha)
+
             # overlay polar radars
             overlayFov(m2, codes=rads_polar_south, maxGate=75, fovColor=polar_color, fovAlpha=fovAlpha)
 
@@ -278,6 +298,7 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
     #axb.get_yaxis().set_visible(False)
     #axb.get_xaxis().set_visible(False)
 
+    # save the plot
     dpi = 200
     fig.savefig(fpath+'.png', dpi=dpi)
     #fig.savefig('/home/muhammad/Dropbox/full.png', dpi=dpi)
@@ -286,8 +307,23 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
     plt.close()
 
 def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
-              stm2=None,
-              hemi='both', coords='mag', fovAlpha=0.7):
+              stm2=None, hemi='both', coords='mag', fovAlpha=0.7):
+
+    """
+    Parameters
+    ----------
+    stm : datetime.datetime
+    etm : datetime.datetime
+    stm2 : datetime.datetime
+    hemi : str
+        Hemisphere(s). Valid inputs are "north", "south", "both"
+    coords : str
+        Coordinates used in the plot. Valid inputs are "mag", "geo", "mlt"
+    fovAlpha : float
+        Transparency of the radar fields of view.
+        Valid inputs are between 0.0 to 1.0.
+    """
+
      
     if stm2 is None:
         dts = pd.date_range(start=stm, end=etm, freq='6m')
