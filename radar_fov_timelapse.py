@@ -82,55 +82,60 @@ def get_rad_by_year(stime, etime):
 
     # get all radars
     rads = network().radars
+
+    # loop through the radars
     for rad in rads:
         rad_stime = rad.stTime
         rad_etime = rad.edTime
         code = rad.code
         code = str(code[0])
+
+        # select radars that exsit between stime and etime
         if (rad_stime >= stime) and (rad_stime <= etime):
+
+            # select only the active radars
             if (rad.status==1):
+
+                # radars in northern hemisphere
                 if rad.sites[0].geolat > 0:
                     codes_north.append(code)
                     nbeams_north.append(rad.sites[0].maxbeam)
                     stimes_north.append(rad_stime)
+
+                # radars in southern hemisphere
                 else:
                     codes_south.append(code)
                     nbeams_south.append(rad.sites[0].maxbeam)
                     stimes_south.append(rad_stime)
 
-
     # All of these radars will be in orange (midlatitude radars).
     rads_midlat_north = ['hok', 'hkw','adw','ade','cvw','cve','fhw','fhe','bks','wal']    
-    #rads_midlat_north_nbeams = [16, 16, 22, 22,  24,   24,   22,   22,   24,   24]
-    rads_midlat_south = ['tig','unw']
-    #rads_midlat_south_nbeams = [16, 16]
+    rads_midlat_south = ['tig','unw', 'bpk']
 
     # These are the high-latitude superdarn radars plotted in blue.
     rads_highlat_north  = ['ksr','kod','pgr','sas','kap','gbr','pyk','han','sto']
-    #rads_highlat_north_nbeams = [16,   16,   16,   16,   16,   16,   16,   16,   16]
     rads_highlat_south = ['ker','sye','sys','san','hal','sps','dce','zho']
-    #rads_highlat_south_nbeams = [16, 16, 16, 16, 16, 16, 16, 16]
 
     # These are the polar darn radars plotted in green.
-    rads_polar_north = ['inv','rkn','cly'] 
-    #rads_polar_north_nbeams = [16,   16,   16]
+    rads_polar_north = ['inv','rkn','cly', 'lyr'] 
     rads_polar_south = ['mcm']
-    #rads_polar_south_nbeams = [16]
-
 
     rads_midlat = rads_midlat_north + rads_midlat_south
     rads_highlat = rads_highlat_north + rads_highlat_south
     rads_polar = rads_polar_north + rads_polar_south
 
     # contruct pandas DataFrames
+    # for northern hemisphere
     dfn = pd.DataFrame(index = stimes_north,
                        data=zip(codes_north, nbeams_north, ['N']*len(stimes_north),
                        ), columns=['code', 'nbeams', 'hemi'])
 
+    # for southern hemisphere
     dfs = pd.DataFrame(index = stimes_south,
                        data=zip(codes_south, nbeams_south, ['S']*len(stimes_south),
                        ), columns=['code', 'nbeams', 'hemi'])
 
+    # join the above two DataFrames
     df = dfn.append(dfs)
     if not df.empty:
         df.loc[:, 'region'] = np.nan
