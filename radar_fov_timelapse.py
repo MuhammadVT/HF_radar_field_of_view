@@ -9,6 +9,15 @@ from matplotlib.ticker import ScalarFormatter, FormatStrFormatter
 import pandas as pd
 import numpy as np
 
+"""
+The functions here visualized the SuperDARN radars' fields of view in
+historical order
+
+Written on 03/04/2016
+
+Muhammad
+"""
+
 def draw_axes(fig_size=None, hemi='both'):
     """Generates an empty figure suitable for the value given to hemi (hemisphere)
 
@@ -76,9 +85,11 @@ def get_rad_by_year(stime, etime):
     codes_north = []
     nbeams_north = []
     stimes_north = []
+    etimes_north = []
     codes_south = []
     nbeams_south = []
     stimes_south = []
+    etimes_south = []
 
     # get all radars
     rads = network().radars
@@ -101,12 +112,14 @@ def get_rad_by_year(stime, etime):
                     codes_north.append(code)
                     nbeams_north.append(rad.sites[0].maxbeam)
                     stimes_north.append(rad_stime)
+                    etimes_north.append(rad_etime)
 
                 # radars in southern hemisphere
                 else:
                     codes_south.append(code)
                     nbeams_south.append(rad.sites[0].maxbeam)
                     stimes_south.append(rad_stime)
+                    etimes_south.append(rad_etime)
 
     # All of these radars will be in orange (midlatitude radars).
     rads_midlat_north = ['hok', 'hkw','adw','ade','cvw','cve','fhw','fhe','bks','wal']    
@@ -126,14 +139,14 @@ def get_rad_by_year(stime, etime):
 
     # contruct pandas DataFrames
     # for northern hemisphere
-    dfn = pd.DataFrame(index = stimes_north,
-                       data=zip(codes_north, nbeams_north, ['N']*len(stimes_north),
-                       ), columns=['code', 'nbeams', 'hemi'])
+    dfn = pd.DataFrame(data=zip(stimes_north, etimes_north, codes_north,\
+                                nbeams_north, ['N']*len(stimes_north),),
+                       columns=['stime', 'etime', 'code', 'nbeams', 'hemi'])
 
     # for southern hemisphere
-    dfs = pd.DataFrame(index = stimes_south,
-                       data=zip(codes_south, nbeams_south, ['S']*len(stimes_south),
-                       ), columns=['code', 'nbeams', 'hemi'])
+    dfs = pd.DataFrame(data=zip(stimes_south, etimes_south, codes_south,\
+                                nbeams_south, ['N']*len(stimes_south),),
+                       columns=['stime', 'etime', 'code', 'nbeams', 'hemi'])
 
     # join the above two DataFrames
     df = dfn.append(dfs)
@@ -302,14 +315,15 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
     dpi = 200
     fig.savefig(fpath+'.png', dpi=dpi)
     #fig.savefig('/home/muhammad/Dropbox/full.png', dpi=dpi)
-    #fig.show()
-    fig.clf()
-    plt.close()
+
+    return fig
 
 def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
               stm2=None, hemi='both', coords='mag', fovAlpha=0.7):
 
-    """
+    """ Repeatedly plots the radar fields of view for the time interval
+    between stm and etm at half a year cadence.
+
     Parameters
     ----------
     stm : datetime.datetime
@@ -344,14 +358,22 @@ def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
                 fpath=fpath + dti.strftime('%Y%b'))
                 #fpath='/home/muhammad/Dropbox/full_time_lapse/' + dti.strftime('%Y%b'))
 
-stm = dt.datetime(1983, 1, 31)
-stm2 = dt.datetime(2003, 1, 31)   # to start the plotting time from 2003
-#stm2 = None
-etm = dt.datetime(2016, 1, 31)
-#coords='mlt'
-coords='mag'
-hemi = 'both'
-#hemi = 'north'
-#hemi = 'south'
-loop_fovs(stm=stm, etm=etm, hemi=hemi, stm2=stm2, coords=coords, fovAlpha=0.7)
+# run the code
+def main():
+    stm = dt.datetime(1983, 1, 31)
+    #stm = dt.datetime(2005, 1, 31)
+    #stm2 = dt.datetime(2003, 1, 31)   # to start the plotting time from 2003
+    stm2 = dt.datetime(2005, 1, 31)
+    #stm2 = None
+    etm = dt.datetime(2017, 7, 31)
+    #coords='mlt'
+    coords='mag'
+    hemi = 'both'
+    #hemi = 'north'
+    #hemi = 'south'
+    loop_fovs(stm=stm, etm=etm, hemi=hemi, stm2=stm2, coords=coords, fovAlpha=0.7)
 
+    return
+
+if __name__ == "__main__":
+    main()
