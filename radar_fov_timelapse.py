@@ -9,8 +9,10 @@ from matplotlib.ticker import ScalarFormatter, FormatStrFormatter
 import pandas as pd
 import numpy as np
 
+import pdb
+
 """
-The functions here visualized the SuperDARN radars' fields of view in
+The functions here visualize the SuperDARN radars' fields of view in
 historical order
 
 Written on 03/04/2016
@@ -164,7 +166,7 @@ def get_rad_by_year(stime, etime):
     return df 
 
 def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
-              hemi='both', coords='mag', fovAlpha=0.7, 
+              hemi='both', coords='mag', fovAlpha=0.7, maxGate=75, 
               fpath='./full_time_lapse'):
     """
     Parameters
@@ -180,6 +182,8 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
     fovAlpha : float
         Transparency of the radar fields of view.
         Valid inputs are between 0.0 to 1.0.
+    maxGate : int
+        The max range-gate at which the field-of-view ends
     fpath : str
         File path where the output plots will be saved
     """
@@ -263,13 +267,22 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
         m1 = plotUtils.mapObj(boundinglat=30., gridLabels=True, coords=coords)
         m1.ax = axn
         if not df.empty:
+
+            # plot radars as black circles
             overlayRadar(m1, codes=rads_north, markerSize=msize, fontSize=fsize)
-            # overlay mid-latitude radars.
-            overlayFov(m1, codes=rads_mid_north, maxGate=75, fovColor=midlat_color, fovAlpha=fovAlpha)
-            # overlay high-latitude radars.
-            overlayFov(m1, codes=rads_high_north, maxGate=75, fovColor=highlat_color, fovAlpha=fovAlpha)
-            # overlay polar radars
-            overlayFov(m1, codes=rads_polar_north, maxGate=75, fovColor=polar_color, fovAlpha=fovAlpha)
+
+            # overlay fields-of-veiw of the mid-latitude radars.
+            model = "IS"
+            overlayFov(m1, model=model, codes=rads_mid_north, maxGate=maxGate, fovColor=midlat_color,
+                       fovAlpha=fovAlpha)
+
+            # overlay fields-of-veiw of the high-latitude radars.
+            overlayFov(m1, model=model, codes=rads_high_north, maxGate=maxGate, fovColor=highlat_color,
+                       fovAlpha=fovAlpha)
+
+            # overlay fields-of-veiw of the polar radars
+            overlayFov(m1, model=model, codes=rads_polar_north, maxGate=maxGate, fovColor=polar_color,
+                       fovAlpha=fovAlpha)
 
         font_size = 5
         axn.xaxis.set_tick_params(labelsize=font_size)
@@ -281,16 +294,21 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
         m2 = plotUtils.mapObj(boundinglat=-30., gridLabels=True, coords=coords)
         m2.ax = axs
         if not df.empty:
+
+            # plot the radars as black circles
             overlayRadar(m2, codes=rads_south, markerSize=msize, fontSize=fsize)
 
-            # overlay midlatitude radars
-            overlayFov(m2, codes=rads_mid_south, maxGate=75, fovColor=midlat_color, fovAlpha=fovAlpha)
+            # overlay fields-of-veiw of the midlatitude radars
+            overlayFov(m2, codes=rads_mid_south, maxGate=maxGate,
+                       fovColor=midlat_color, fovAlpha=fovAlpha)
 
-            # overlay high-latitude radars
-            overlayFov(m2, codes=rads_high_south, maxGate=75, fovColor=highlat_color, fovAlpha=fovAlpha)
+            # overlay fields-of-veiw of the high-latitude radars
+            overlayFov(m2, codes=rads_high_south, maxGate=maxGate,
+                       fovColor=highlat_color, fovAlpha=fovAlpha)
 
-            # overlay polar radars
-            overlayFov(m2, codes=rads_polar_south, maxGate=75, fovColor=polar_color, fovAlpha=fovAlpha)
+            # overlay fields-of-veiw of the polar radars
+            overlayFov(m2, codes=rads_polar_south, maxGate=maxGate,
+                       fovColor=polar_color, fovAlpha=fovAlpha)
 
         font_size = 5
         axs.xaxis.set_tick_params(labelsize=font_size)
@@ -312,8 +330,8 @@ def plot_fovs(stime, etime, stm2=None, etm=dt.datetime(2016, 1, 31),
     #axb.get_xaxis().set_visible(False)
 
     # save the plot
-    dpi = 200
-    fig.savefig(fpath+'.png', dpi=dpi)
+    #dpi = 200
+    #fig.savefig(fpath+'.png', dpi=dpi)
     #fig.savefig('/home/muhammad/Dropbox/full.png', dpi=dpi)
 
     return fig
@@ -340,8 +358,10 @@ def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
 
      
     if stm2 is None:
+        # create datatimes starting from stm with 6 month of intervals
         dts = pd.date_range(start=stm, end=etm, freq='6m')
     else:
+        # create datatimes starting from stm2 with 6 month of intervals
         dts = pd.date_range(start=stm2, end=etm, freq='6m')
     if hemi == 'both':
         #fpath = './full_time_lapse/'
@@ -353,25 +373,31 @@ def loop_fovs(stm=dt.datetime(1983, 1, 31), etm=dt.datetime(2016, 1, 31),
         fpath = './south_time_lapse/'
 
     for dti in dts:
-        plot_fovs(stm, dti, stm2=stm2, etm=etm, hemi=hemi, coords=coords,
-                fovAlpha=fovAlpha,
-                fpath=fpath + dti.strftime('%Y%b'))
-                #fpath='/home/muhammad/Dropbox/full_time_lapse/' + dti.strftime('%Y%b'))
+        fig =plot_fovs(stm, dti, stm2=stm2, etm=etm, hemi=hemi, coords=coords,
+                       fovAlpha=fovAlpha,
+                       fpath=fpath + dti.strftime('%Y%b'))
+                       #fpath='/home/muhammad/Dropbox/full_time_lapse/' + dti.strftime('%Y%b'))
 
 # run the code
 def main():
     stm = dt.datetime(1983, 1, 31)
     #stm = dt.datetime(2005, 1, 31)
     #stm2 = dt.datetime(2003, 1, 31)   # to start the plotting time from 2003
-    stm2 = dt.datetime(2005, 1, 31)
+    #stm2 = dt.datetime(2017, 1, 31)
+    stm2 = dt.datetime(2010, 1, 31)
     #stm2 = None
     etm = dt.datetime(2017, 7, 31)
     #coords='mlt'
     coords='mag'
-    hemi = 'both'
+    #hemi = 'both'
     #hemi = 'north'
-    #hemi = 'south'
-    loop_fovs(stm=stm, etm=etm, hemi=hemi, stm2=stm2, coords=coords, fovAlpha=0.7)
+    hemi = 'south'
+    #loop_fovs(stm=stm, etm=etm, hemi=hemi, stm2=stm2, coords=coords, fovAlpha=0.7)
+
+    fig =plot_fovs(stm, stm2, stm2=None, etm=etm, hemi=hemi,
+                   coords=coords, maxGate=80)
+
+    plt.show()
 
     return
 
